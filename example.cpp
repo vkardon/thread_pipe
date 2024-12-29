@@ -8,7 +8,7 @@
 #include <vector>           // std::vector
 #include <unistd.h>         // syscall()
 #include <sys/syscall.h>    // __NR_gettid
-#include "Pipe.hpp"
+#include "pipe.hpp"
 
 // Helper macro to synchronize writing to std::cout
 static std::mutex sLogMutex;

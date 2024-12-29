@@ -1,5 +1,5 @@
 //
-// Pipe.hpp
+// pipe.hpp
 //
 #ifndef __PIPE_HPP__
 #define __PIPE_HPP__
