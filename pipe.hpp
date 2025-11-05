@@ -4,10 +4,9 @@
 #ifndef __PIPE_HPP__
 #define __PIPE_HPP__
 
-#include <list>
+#include <deque>
 #include <mutex>
 #include <condition_variable>
-#include <list>
 
 //
 // Pipe class to provide thread-safe read/write access to stored objects
@@ -41,7 +40,7 @@ private:
     Pipe(const Pipe&) = delete;
     Pipe& operator=(const Pipe&) = delete;
 
-    std::list<DATA> mDataList;
+    std::deque<DATA> mDataList;
     size_t mCapacity = 0;
     bool mHasMore = true;   // Initially, since we expect data to be pushed
     std::mutex mMtx;
@@ -114,8 +113,7 @@ void Pipe<DATA>::Clear()
 {
     std::unique_lock<std::mutex> lock(mMtx);
     mDataList.clear();
-    mCapacity = 0;          // Unlimited capacity (0)
-    mHasMore = true;
+    mHasMore = true;        // Resets to initial state
     mPopCv.notify_all();    // In case we are waiting in Pop()
     mPushCv.notify_all();   // In case we are waiting in Push()
 }
