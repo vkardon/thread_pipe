@@ -57,8 +57,7 @@ void Pipe<DATA>::Push(const DATA& data)
 {
     std::unique_lock<std::mutex> lock(mMtx);
 
-    while(mCapacity > 0 && mDataList.size() >= mCapacity)
-        mPushCv.wait(lock);
+    mPushCv.wait(lock, [this](){ return (mCapacity == 0 || mDataList.size() < mCapacity); });
 
     mDataList.emplace_back(data);
     mPopCv.notify_one();
@@ -69,8 +68,7 @@ void Pipe<DATA>::Push(DATA&& data)
 {
     std::unique_lock<std::mutex> lock(mMtx);
 
-    while(mCapacity > 0 && mDataList.size() >= mCapacity)
-        mPushCv.wait(lock);
+    mPushCv.wait(lock, [this](){ return (mCapacity == 0 || mDataList.size() < mCapacity); });
 
     mDataList.emplace_back(std::move(data));
     mPopCv.notify_one();
@@ -87,8 +85,7 @@ bool Pipe<DATA>::Pop(DATA& data)
         return false; // No more data
 
     // If data list is empty but we expect more data, then wait for it
-    while(mDataList.empty() && mHasMore)
-        mPopCv.wait(lock);
+    mPopCv.wait(lock, [this] { return (!mDataList.empty() || !mHasMore); });
 
     // If data list is empty and we no longer expect more data, then we are done
     if(mDataList.empty() && !mHasMore)
